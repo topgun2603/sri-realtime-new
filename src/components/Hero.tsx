@@ -19,7 +19,7 @@ export const Hero: React.FC<HeroProps> = ({ setCurrentTab }) => {
         <div className="absolute inset-0 bg-gradient-to-b from-sky-950/20 via-transparent to-sky-950/20" />
       </div>
 
-      {/* Top Left Apple-style Sticker Cutout (Clickable: Pasumaivelanmai) */}
+      {/* Top Left Apple-style Card (Clickable: Pasumaivelanmai) */}
       <a
         href="https://pasumaivelanmai.com"
         target="_blank"
@@ -28,11 +28,13 @@ export const Hero: React.FC<HeroProps> = ({ setCurrentTab }) => {
         className="hidden lg:block absolute top-4 lg:top-8 xl:top-6 2xl:top-4 left-0 lg:-left-8 xl:-left-4 2xl:left-0 z-20 pointer-events-auto group animate-float cursor-pointer"
       >
         <div className="flex flex-col items-center">
-          <img
-            src="/hero_left_sticker.png"
-            alt="Pasumaivelanmai - Carrot Agricultural Field & Farmers Harvest"
-            className="w-48 lg:w-60 xl:w-72 2xl:w-80 h-auto drop-shadow-2xl group-hover:scale-105 transition-transform duration-300"
-          />
+          <div className="w-40 lg:w-52 xl:w-64 2xl:w-72 h-64 lg:h-80 xl:h-96 2xl:h-[426px] rounded-3xl overflow-hidden shadow-2xl border-2 border-emerald-500/20 group-hover:scale-105 group-hover:border-emerald-500/50 transition-all duration-300 bg-white">
+            <img
+              src="/hero_left_sticker.png"
+              alt="Pasumaivelanmai - Agricultural Field & Farmers Harvest"
+              className="w-full h-full object-cover"
+            />
+          </div>
 
           {/* Bottom Product Label Box */}
           <div className="mt-2 bg-white/95 backdrop-blur-md px-4 py-1.5 rounded-full shadow-lg border border-emerald-200 flex items-center gap-1.5 text-xs font-bold text-emerald-900 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 transition-all duration-300">

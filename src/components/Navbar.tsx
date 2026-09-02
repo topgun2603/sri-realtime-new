@@ -53,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               />
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-algeria text-lg sm:text-xl tracking-tight text-red-600 font-bold whitespace-nowrap">
+                  <span className="font-algeria text-lg sm:text-xl tracking-tight text-[#0a1f64] font-bold whitespace-nowrap">
                     SRI REAL TIME
                   </span>
                   <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-sky-50 text-sky-700 rounded border border-sky-200 font-mono shadow-xs whitespace-nowrap">
