@@ -33,7 +33,32 @@ Both groups are optional — the app degrades honestly without them.
 | Variable | Purpose | Without it |
 | --- | --- | --- |
 | `GEMINI_API_KEY` | Powers the AI solution architect | The endpoint returns a curated fallback recommendation |
-| `VITE_FIREBASE_*` | Firestore writes + analytics | The contact form falls back to a `mailto:` handoff |
+| `SMTP_*`, `CONTACT_TO` | Emails contact-form enquiries | Delivery falls through to Firestore, then `mailto:` |
+| `VITE_FIREBASE_*` | Firestore record + analytics | Only the `mailto:` fallback remains |
+
+### Contact form delivery
+
+`POST /api/contact` emails the enquiry to `CONTACT_TO` (default
+`org@srirealtime.com`), with `Reply-To` set to the person who filled the form,
+so replying goes straight back to them. The endpoint validates and length-caps
+every field, strips CR/LF so nothing can inject mail headers, escapes the HTML
+body, and rate-limits to 5 submissions per IP per 15 minutes.
+
+Delivery degrades in order, and never reports a success that did not happen:
+
+1. `POST /api/contact` — emails you (needs the Express server and `SMTP_*`)
+2. Firestore `inquiries` — durable record
+3. `mailto:` handoff in the visitor's own mail client
+
+For **Gmail / Google Workspace**, set `SMTP_HOST=smtp.gmail.com`,
+`SMTP_PORT=465` and an [App Password](https://myaccount.google.com/apppasswords)
+as `SMTP_PASS`. A normal account password will be refused.
+
+> **On static hosting there is no `/api`.** `firebase deploy --only hosting`
+> publishes `dist/` alone, so step 1 (and the AI architect) only exist when the
+> Express server is running — `npm start`, or any Node host. To get email from a
+> purely static deploy, install the Firebase **Trigger Email** extension and
+> point it at the `inquiries` collection; step 2 then sends the mail for you.
 
 Firebase config is read from `VITE_FIREBASE_API_KEY`, `_AUTH_DOMAIN`, `_PROJECT_ID`,
 `_STORAGE_BUCKET`, `_MESSAGING_SENDER_ID`, `_APP_ID` and `_MEASUREMENT_ID`. Keep real values in

@@ -1,28 +1,50 @@
+import dotenv from "dotenv";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import { handleContact, isMailConfigured } from "./src/server/contact";
+
+// dotenv was a dependency but was never called, so nothing in .env.local ever
+// reached the server. .env.local wins; dotenv does not overwrite what is set.
+dotenv.config({ path: ".env.local" });
+dotenv.config();
 
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: "64kb" }));
+
+  // Trust the proxy hop so rate limiting sees the real client address.
+  app.set("trust proxy", 1);
 
   // Health check endpoint
   app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
+    res.json({
+      status: "ok",
+      mail: isMailConfigured() ? "configured" : "not configured",
+      timestamp: new Date().toISOString(),
+    });
   });
+
+  // Contact form -> email to the address in CONTACT_TO
+  app.post("/api/contact", handleContact);
 
   // AI Solution Architect & Project Scope Recommendation Endpoint
   app.post("/api/ai-consultant", async (req, res) => {
     try {
       const { projectType, businessGoal, keyFeatures, techPreferences, budgetRange } = req.body;
 
-      const apiKey = process.env.GEMINI_API_KEY;
-      
-      if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
+      // Treat an unfilled placeholder as unset. Now that .env.local is
+      // actually loaded, a value like "your_gemini_api_key_here" would
+      // otherwise be sent to Gemini and come back as an auth error.
+      const apiKey = process.env.GEMINI_API_KEY?.trim();
+      const isPlaceholder =
+        !apiKey || /^(your[_-]|my[_-]|changeme|placeholder|xxx)/i.test(apiKey);
+
+      if (isPlaceholder) {
         // High quality fallback solution breakdown when API Key is not set yet
         return res.json({
           recommendedArchitecture: `Enterprise Full-Stack Architecture (${projectType || "Enterprise System"})`,

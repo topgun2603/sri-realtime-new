@@ -22,7 +22,7 @@ const SERVICE_OPTIONS = [
   'Something else',
 ];
 
-type Status = 'idle' | 'sending' | 'sent' | 'fallback';
+type Status = 'idle' | 'sending' | 'sent' | 'fallback' | 'rejected';
 
 export default function Contact() {
   useSeo({
@@ -65,7 +65,15 @@ export default function Contact() {
       return;
     }
 
-    // No backend configured, or the write failed — offer email instead of
+    // The server read it and refused — a mail client won't fix bad input or a
+    // rate limit, so show what it said and let them correct it.
+    if (result.reason === 'invalid' || result.reason === 'rate_limited') {
+      setStatus('rejected');
+      setErrorDetail(result.error ?? 'That could not be sent. Please check the form and retry.');
+      return;
+    }
+
+    // Nothing could take it — offer the visitor's own mail client rather than
     // pretending the message was delivered.
     setStatus('fallback');
     setErrorDetail(result.reason === 'unconfigured' ? '' : (result.error ?? ''));
@@ -237,6 +245,19 @@ export default function Contact() {
                       className={inputClass}
                     />
                   </Field>
+
+                  {status === 'rejected' && (
+                    <div
+                      role="alert"
+                      className="flex items-start gap-3 rounded-xl border border-line bg-accent-soft p-5 text-sm"
+                    >
+                      <AlertTriangle
+                        className="mt-0.5 h-4 w-4 shrink-0 text-accent"
+                        aria-hidden="true"
+                      />
+                      <p className="text-muted">{errorDetail}</p>
+                    </div>
+                  )}
 
                   {status === 'fallback' && (
                     <div
