@@ -3,6 +3,7 @@ import { Hero } from '../components/sections/Hero';
 import { Services } from '../components/sections/Services';
 import { WhyUs } from '../components/sections/WhyUs';
 import { Products } from '../components/sections/Products';
+import { ProductDemos } from '../components/sections/ProductDemos';
 import { Capabilities } from '../components/sections/Capabilities';
 import { ProcessCompact } from '../components/sections/Process';
 
@@ -20,6 +21,7 @@ export default function Home() {
       <Services variant="teaser" />
       <WhyUs />
       <Products />
+      <ProductDemos />
       <Capabilities variant="teaser" />
       <ProcessCompact />
     </>

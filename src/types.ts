@@ -77,6 +77,18 @@ export interface ProductItem {
   sector: string;
   /** Two-letter mark rendered in the generated card visual. */
   monogram: string;
+  /**
+   * Walkthrough recording. Wired up ahead of the files existing — the demo
+   * section falls back to a live-walkthrough invitation until they do.
+   */
+  demo: {
+    video: string;
+    poster: string;
+    /** Optional WebVTT captions track. */
+    captions?: string;
+    /** What the recording actually shows, for the section copy. */
+    covers: string;
+  };
 }
 
 export interface AIRecommendation {

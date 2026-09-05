@@ -42,6 +42,12 @@ export const PRODUCTS: ProductItem[] = [
     url: 'https://pasumaivelanmai.com',
     sector: 'AgriTech',
     monogram: 'PV',
+    demo: {
+      video: '/videos/pasumaivelanmai-demo.mp4',
+      poster: '/images/demo-pasumaivelanmai.png',
+      captions: '/videos/pasumaivelanmai-demo.vtt',
+      covers: 'Grower onboarding, crop records and the field-to-market flow.',
+    },
   },
   {
     id: 'pasumaitrade',
@@ -52,6 +58,12 @@ export const PRODUCTS: ProductItem[] = [
     url: 'https://pasumaitrade.com',
     sector: 'Marketplace',
     monogram: 'PT',
+    demo: {
+      video: '/videos/pasumaitrade-demo.mp4',
+      poster: '/images/demo-pasumaitrade.png',
+      captions: '/videos/pasumaitrade-demo.vtt',
+      covers: 'Listing a commodity, matching a buyer and closing the trade.',
+    },
   },
 ];
 

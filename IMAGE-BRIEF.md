@@ -135,6 +135,51 @@ The share preview currently uses `logo.png`, which is 320 × 231 — it renders 
 
 ---
 
+## 6. Product demo videos
+
+The "See it working" section on the landing page is wired for walkthrough
+recordings. Until a file exists it shows the product poster with a **Book a live
+walkthrough** button, so the slot never looks broken.
+
+| Product | Video | Poster (still frame) | Captions |
+| --- | --- | --- | --- |
+| Pasumaivelanmai | `public/videos/pasumaivelanmai-demo.mp4` | `public/images/demo-pasumaivelanmai.png` | `public/videos/pasumaivelanmai-demo.vtt` |
+| Pasumai Trade | `public/videos/pasumaitrade-demo.mp4` | `public/images/demo-pasumaitrade.png` | `public/videos/pasumaitrade-demo.vtt` |
+
+### Specification
+
+- **Format:** MP4, H.264 video + AAC audio (the one combination every browser plays)
+- **Resolution:** 1920 × 1080, 16:9. The player is capped around 800px wide, so 1080p is plenty
+- **Length:** 45–90 seconds. Past that, people stop watching
+- **File size:** **keep each under 10 MB.** These load on your landing page — a 60 MB
+  video will hurt the page far more than the demo helps. Handbrake or
+  `ffmpeg -crf 28 -preset slow` gets a clean screen recording well under that
+- **Poster:** 1920 × 1080 PNG or JPG — the frame shown before play. Pick a moment that
+  shows the interface full of real data, not an empty state or a login screen
+- **Captions:** a WebVTT (`.vtt`) file. Optional, but it makes the demo usable with sound
+  off, which is how most people will first watch it
+
+### What to record
+
+Screen capture of the real product. No talking-head intro, no title card — open
+on the interface and go. Suggested beats:
+
+- **Pasumaivelanmai** — grower onboarding, crop records, and the field-to-market flow
+- **Pasumai Trade** — listing a commodity, matching a buyer, closing the trade
+
+Use realistic seed data. Blur or replace anything belonging to a real user.
+
+### Compressing a screen recording
+
+```bash
+ffmpeg -i raw.mov -vf scale=1920:-2 -c:v libx264 -crf 28 -preset slow        -c:a aac -b:a 128k -movflags +faststart demo.mp4
+```
+
+`+faststart` matters — it moves the index to the front of the file so playback
+can begin before the whole thing has downloaded.
+
+---
+
 ## Housekeeping
 
 `public/` still holds **5.4 MB of images from the old design** that nothing references any more
