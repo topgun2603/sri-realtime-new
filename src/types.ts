@@ -1,13 +1,3 @@
-export type NavTab = 
-  | 'home'
-  | 'services'
-  | 'ai-hub'
-  | 'tech-stack'
-  | 'delivery-process'
-  | 'portfolio'
-  | 'estimator'
-  | 'contact';
-
 export type DeviceMode = 'responsive' | 'mobile' | 'tablet' | 'laptop' | 'desktop' | '4k' | 'tv100';
 
 export interface AccessibilitySettings {
@@ -31,8 +21,8 @@ export interface ServiceItem {
   iconName: string;
   keyFeatures: string[];
   workflowFlow?: string;
-  metrics?: string;
-  samplePreviewType?: 'mis' | 'erp' | 'inventory' | 'ecommerce' | 'crm' | 'scm' | 'chatbot' | 'predictive' | 'docproc' | 'mobile' | 'web' | 'api';
+  /** What the architecture is engineered to achieve — a design target, not a measured client result. */
+  engineeredFor?: string;
 }
 
 export type TechCategory = 'frontend' | 'backend' | 'databases' | 'ai' | 'cloud' | 'enterprise';
@@ -54,17 +44,39 @@ export interface ProcessStep {
   keyActivities: string[];
 }
 
-export interface PortfolioItem {
+/**
+ * A representative solution blueprint showing how we approach a class of problem.
+ * These describe our engineering approach and design targets — they are not
+ * claimed results from named client engagements.
+ */
+export interface CapabilityShowcase {
   id: string;
   title: string;
   domain: string;
-  clientType: 'Enterprise' | 'SME' | 'Startup';
+  scale: string;
   summary: string;
-  challenge: string;
-  solution: string;
-  metrics: { label: string; value: string }[];
+  problem: string;
+  approach: string;
+  /** Design targets the architecture is built to hit. */
+  targets: { label: string; value: string }[];
   techUsed: string[];
   featured: boolean;
+  /**
+   * Set when the blueprint is an actual product we build and operate, rather
+   * than a representative architecture. Rendered as a badge on the card.
+   */
+  status?: string;
+}
+
+export interface ProductItem {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  url: string;
+  sector: string;
+  /** Two-letter mark rendered in the generated card visual. */
+  monogram: string;
 }
 
 export interface AIRecommendation {

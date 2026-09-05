@@ -15,8 +15,10 @@ interface AccessibilityContextType {
   resetAccessibility: () => void;
 }
 
+const STORAGE_KEY = 'sri_a11y_settings';
+
 const defaultSettings: AccessibilitySettings = {
-  darkMode: false,
+  darkMode: true,
   fontSizeScale: 'normal',
   highContrast: false,
   reducedMotion: false,
@@ -25,96 +27,73 @@ const defaultSettings: AccessibilitySettings = {
   tvPresentationMode: false,
 };
 
+function loadSettings(): AccessibilitySettings {
+  if (typeof window === 'undefined') return defaultSettings;
+
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      // Merge over defaults so settings added later don't come back undefined.
+      return { ...defaultSettings, ...JSON.parse(saved) };
+    }
+  } catch {
+    /* storage unavailable or corrupt — fall through to system preference */
+  }
+
+  // The design is authored dark-first; a visitor who explicitly prefers light
+  // still gets it, but dark is what we open with.
+  const prefersLight =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-color-scheme: light)').matches;
+
+  return { ...defaultSettings, darkMode: !prefersLight };
+}
+
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
 
 export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [settings, setSettings] = useState<AccessibilitySettings>(() => {
-    const saved = localStorage.getItem('sri_a11y_settings');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return defaultSettings;
-      }
-    }
-    // Check system preference for dark mode
-    const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return { ...defaultSettings, darkMode: systemDark };
-  });
-
+  const [settings, setSettings] = useState<AccessibilitySettings>(loadSettings);
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('responsive');
 
   useEffect(() => {
-    localStorage.setItem('sri_a11y_settings', JSON.stringify(settings));
-    
-    // Dark mode class on HTML root
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    } catch {
+      /* private browsing or blocked storage — preferences just won't persist */
+    }
+
     const root = document.documentElement;
-    if (settings.darkMode) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    const flags: [boolean, string][] = [
+      [settings.darkMode, 'dark'],
+      [settings.highContrast, 'high-contrast'],
+      [settings.dyslexicFont, 'font-dyslexic'],
+      [settings.reducedMotion, 'reduced-motion'],
+      [settings.screenReaderHighlight, 'a11y-focus-visible'],
+      [settings.tvPresentationMode, 'tv-display-mode'],
+    ];
 
-    // High contrast
-    if (settings.highContrast) {
-      root.classList.add('high-contrast');
-    } else {
-      root.classList.remove('high-contrast');
-    }
+    for (const [on, cls] of flags) root.classList.toggle(cls, on);
 
-    // Dyslexic font
-    if (settings.dyslexicFont) {
-      root.classList.add('font-dyslexic');
-    } else {
-      root.classList.remove('font-dyslexic');
-    }
+    // Font scale drives the root size so every rem-based value follows it.
+    const scale =
+      settings.fontSizeScale === 'large' ? '112.5%'
+      : settings.fontSizeScale === 'xlarge' ? '125%'
+      : '100%';
+    root.style.fontSize = scale;
 
-    // Reduced motion
-    if (settings.reducedMotion) {
-      root.classList.add('reduced-motion');
-    } else {
-      root.classList.remove('reduced-motion');
-    }
-
-    // Screen reader focus outline
-    if (settings.screenReaderHighlight) {
-      root.classList.add('a11y-focus-visible');
-    } else {
-      root.classList.remove('a11y-focus-visible');
-    }
-
+    // Keep the browser UI (address bar, etc.) in step with the theme.
+    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.content = settings.darkMode ? '#04070F' : '#FFFFFF';
   }, [settings]);
 
-  const toggleDarkMode = () => {
-    setSettings((prev) => ({ ...prev, darkMode: !prev.darkMode }));
-  };
-
-  const setFontScale = (scale: 'normal' | 'large' | 'xlarge') => {
-    setSettings((prev) => ({ ...prev, fontSizeScale: scale }));
-  };
-
-  const toggleHighContrast = () => {
-    setSettings((prev) => ({ ...prev, highContrast: !prev.highContrast }));
-  };
-
-  const toggleReducedMotion = () => {
-    setSettings((prev) => ({ ...prev, reducedMotion: !prev.reducedMotion }));
-  };
-
-  const toggleDyslexicFont = () => {
-    setSettings((prev) => ({ ...prev, dyslexicFont: !prev.dyslexicFont }));
-  };
-
-  const toggleScreenReaderHighlight = () => {
-    setSettings((prev) => ({ ...prev, screenReaderHighlight: !prev.screenReaderHighlight }));
-  };
+  const toggle = (key: keyof AccessibilitySettings) => () =>
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const toggleTVPresentationMode = () => {
     setSettings((prev) => {
-      const nextTv = !prev.tvPresentationMode;
-      if (nextTv) setDeviceMode('tv100');
-      else setDeviceMode('responsive');
-      return { ...prev, tvPresentationMode: nextTv };
+      const next = !prev.tvPresentationMode;
+      setDeviceMode(next ? 'tv100' : 'responsive');
+      return { ...prev, tvPresentationMode: next };
     });
   };
 
@@ -128,12 +107,12 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         settings,
         deviceMode,
-        toggleDarkMode,
-        setFontScale,
-        toggleHighContrast,
-        toggleReducedMotion,
-        toggleDyslexicFont,
-        toggleScreenReaderHighlight,
+        toggleDarkMode: toggle('darkMode'),
+        setFontScale: (fontSizeScale) => setSettings((prev) => ({ ...prev, fontSizeScale })),
+        toggleHighContrast: toggle('highContrast'),
+        toggleReducedMotion: toggle('reducedMotion'),
+        toggleDyslexicFont: toggle('dyslexicFont'),
+        toggleScreenReaderHighlight: toggle('screenReaderHighlight'),
         toggleTVPresentationMode,
         setDeviceMode,
         resetAccessibility,

@@ -1,187 +1,106 @@
-import React, { useState } from 'react';
-import { AccessibilityProvider, useAccessibility } from './context/AccessibilityContext';
-import { NavTab, ServiceCategory } from './types';
-import { Navbar } from './components/Navbar';
-import { Footer } from './components/Footer';
-import { Hero } from './components/Hero';
-import { ServicesSection } from './components/ServicesSection';
-import { AIHub } from './components/AIHub';
-import { TechStackMatrix } from './components/TechStackMatrix';
-import { DeliveryProcess } from './components/DeliveryProcess';
-import { PortfolioShowcase } from './components/PortfolioShowcase';
-import { ProjectEstimator } from './components/ProjectEstimator';
-import { ContactSection } from './components/ContactSection';
-import { WHY_CHOOSE_US, COMPANY_INFO } from './data/companyData';
-import {
-  Award, Cpu, Clock, HeartHandshake, DollarSign, Layers,
-  CheckCircle2, ArrowRight, Sparkles
-} from 'lucide-react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { AccessibilityProvider } from './context/AccessibilityContext';
+import { Navbar } from './components/layout/Navbar';
+import { Footer } from './components/layout/Footer';
+import { AccessibilityPanel } from './components/layout/AccessibilityPanel';
+import { ScrollProgress } from './components/ui/ScrollProgress';
+import { initAnalytics } from './lib/firebase';
 
-function MainApp() {
-  const [currentTab, setCurrentTab] = useState<NavTab>('home');
-  const [estimateNotes, setEstimateNotes] = useState('');
-  const [selectedServiceCategory, setSelectedServiceCategory] = useState<ServiceCategory>('enterprise');
-  const [targetServiceId, setTargetServiceId] = useState<string | null>(null);
-  const { settings } = useAccessibility();
+// The landing page ships in the main bundle so the first paint needs no
+// extra round trip. Every other route is split out and fetched on demand.
+import Home from './pages/Home';
 
-  const handleSelectTab = (tab: NavTab) => {
-    if (tab === 'services') {
-      setSelectedServiceCategory('enterprise');
-      setTargetServiceId(null);
+const Services = lazy(() => import('./pages/Services'));
+const AIHub = lazy(() => import('./pages/AIHub'));
+const Technology = lazy(() => import('./pages/Technology'));
+const Process = lazy(() => import('./pages/Process'));
+const Work = lazy(() => import('./pages/Work'));
+const Estimator = lazy(() => import('./pages/Estimator'));
+const Contact = lazy(() => import('./pages/Contact'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+/** Returns to the top of the document whenever the route changes. */
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [pathname]);
+
+  return null;
+};
+
+/** Holds the viewport steady while a route chunk loads. */
+const RouteFallback: React.FC = () => (
+  <div className="grid min-h-[60vh] place-items-center" role="status" aria-live="polite">
+    <span className="sr-only">Loading</span>
+    <span
+      className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-accent"
+      aria-hidden="true"
+    />
+  </div>
+);
+
+const Shell: React.FC = () => {
+  const [a11yOpen, setA11yOpen] = useState(false);
+  const { pathname } = useLocation();
+
+  // Analytics is deferred until the page is idle so it never competes with
+  // the first render.
+  useEffect(() => {
+    const start = () => void initAnalytics();
+
+    // requestIdleCallback is still missing in Safari, so fall back to a timer.
+    const scheduler = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    if (typeof scheduler.requestIdleCallback === 'function') {
+      const handle = scheduler.requestIdleCallback(start, { timeout: 4000 });
+      return () => scheduler.cancelIdleCallback?.(handle);
     }
-    setCurrentTab(tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
-  const handleNavigateToServiceCategory = (category: ServiceCategory, targetId?: string) => {
-    setSelectedServiceCategory(category);
-    setTargetServiceId(targetId || null);
-    setCurrentTab('services');
-  };
+    const handle = window.setTimeout(start, 2500);
+    return () => window.clearTimeout(handle);
+  }, []);
 
-  const getWhyChooseIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'Award': return Award;
-      case 'Cpu': return Cpu;
-      case 'Clock': return Clock;
-      case 'HeartHandshake': return HeartHandshake;
-      case 'DollarSign': return DollarSign;
-      case 'Layers': return Layers;
-      default: return CheckCircle2;
-    }
-  };
-
-  const handleShareEstimateWithContact = (specs: string) => {
-    setEstimateNotes(specs);
-  };
+  // The home hero renders its own dark field beneath the transparent header.
+  const offsetHeader = pathname !== '/';
 
   return (
-    <div className={`min-h-screen bg-transparent text-slate-900 font-sans transition-colors ${settings.fontSizeScale === 'large' ? 'text-lg' : settings.fontSizeScale === 'xlarge' ? 'text-xl' : 'text-base'}`}>
+    <>
+      <ScrollProgress />
+      <ScrollToTop />
+      <Navbar onOpenA11y={() => setA11yOpen(true)} />
 
-      {/* Fully Responsive Main Layout Container */}
-      <div className="w-full bg-transparent">
+      <main id="main" className={offsetHeader ? 'pt-[72px]' : undefined}>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/ai" element={<AIHub />} />
+            <Route path="/technology" element={<Technology />} />
+            <Route path="/process" element={<Process />} />
+            <Route path="/work" element={<Work />} />
+            <Route path="/estimator" element={<Estimator />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </main>
 
-        {/* Navigation Header */}
-        <Navbar currentTab={currentTab} setCurrentTab={handleSelectTab} />
-
-        {/* Tab / Page Views */}
-        <main id="main-content-area">
-          {currentTab === 'home' && (
-            <div>
-              <Hero setCurrentTab={setCurrentTab} />
-
-              {/* Featured Services Teaser */}
-              <ServicesSection />
-
-              {/* WHY CHOOSE SRI REAL TIME Section */}
-              <section className="py-16 lg:py-24 bg-transparent transition-colors border-b border-sky-200/30">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="text-center max-w-3xl mx-auto mb-16">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-[#0b6908b5] border border-emerald-200 mb-3 uppercase tracking-wider font-mono shadow-sm">
-                      WHY CHOOSE <span className="font-algeria">SRI REAL TIME</span>
-                    </div>
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0b6908b5] tracking-tight">
-                      Built for Clean Design & Robust Engineering
-                    </h2>
-                    <p className="mt-4 text-slate-600 text-base leading-relaxed">
-                      We combine deep domain expertise with a client-first approach — turning complex enterprise challenges into intuitive digital products.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {WHY_CHOOSE_US.map((item, idx) => {
-                      const Icon = getWhyChooseIcon(item.icon);
-                      return (
-                        <div
-                          key={idx}
-                          className="p-8 apple-card shadow-xl group flex flex-col justify-between"
-                        >
-                          <div>
-                            <div className="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center mb-6 shadow-xs group-hover:scale-105 transition-transform">
-                              <Icon className="w-7 h-7" />
-                            </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-3">
-                              {item.title}
-                            </h3>
-                            <p className="text-sm text-slate-600 leading-relaxed font-normal">
-                              {item.description}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Callout Banner */}
-                  <div className="mt-16 p-8 lg:p-12 rounded-[28px] bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-2xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="space-y-2 max-w-2xl">
-                      <span className="text-sky-400 font-bold text-xs uppercase tracking-wider block font-mono">
-                        Ready to establish or expand your digital footprint?
-                      </span>
-                      <h3 className="text-2xl sm:text-3xl font-black text-white">
-                        Partner with <span className="font-algeria">SRI REAL TIME</span> Technical Experts
-                      </h3>
-                      <p className="text-sm italic font-serif text-slate-300 leading-relaxed pt-1">
-                        "Combining deep technical expertise with a client-first approach to turn complex business challenges into elegant, highly intuitive enterprise products."
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => { setCurrentTab('estimator'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                      className="px-8 py-4 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-full shadow-lg shadow-sky-600/20 shrink-0 transition flex items-center gap-2 text-xs uppercase tracking-widest cursor-pointer"
-                    >
-                      <Sparkles className="w-4 h-4 text-white" />
-                      <span>Start Project Scope Estimate</span>
-                    </button>
-                  </div>
-                </div>
-              </section>
-
-              {/* Delivery Process Teaser */}
-              <DeliveryProcess />
-
-              {/* Tech Stack Matrix Teaser */}
-              <TechStackMatrix />
-
-              {/* Contact Teaser */}
-              <ContactSection initialNotes={estimateNotes} />
-            </div>
-          )}
-
-          {currentTab === 'services' && (
-            <ServicesSection
-              initialCategory={selectedServiceCategory}
-              targetId={targetServiceId}
-            />
-          )}
-          {currentTab === 'ai-hub' && <AIHub />}
-          {currentTab === 'tech-stack' && <TechStackMatrix />}
-          {currentTab === 'delivery-process' && <DeliveryProcess />}
-          {currentTab === 'portfolio' && <PortfolioShowcase />}
-          {currentTab === 'estimator' && (
-            <ProjectEstimator
-              setCurrentTab={setCurrentTab}
-              onShareEstimateWithContact={handleShareEstimateWithContact}
-            />
-          )}
-          {currentTab === 'contact' && <ContactSection initialNotes={estimateNotes} />}
-        </main>
-
-        {/* Global Footer */}
-        <Footer
-          setCurrentTab={handleSelectTab}
-          onNavigateToServiceCategory={handleNavigateToServiceCategory}
-        />
-
-      </div>
-
-    </div>
+      <Footer />
+      <AccessibilityPanel open={a11yOpen} onClose={() => setA11yOpen(false)} />
+    </>
   );
-}
+};
 
 export default function App() {
   return (
     <AccessibilityProvider>
-      <MainApp />
+      <Shell />
     </AccessibilityProvider>
   );
 }

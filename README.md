@@ -1,57 +1,99 @@
-# SRI REAL TIME — Enterprise Web Platform & Solutions
+# SRI REAL TIME — Enterprise Web Platform
 
-Official web application for **SRI REAL TIME** — Full-Service Technology Company specializing in Enterprise Digital Architecture, Artificial Intelligence & Automation, Custom Software Engineering, and Digital Transformation.
+Marketing and capability site for **SRI REAL TIME** — a full-service technology company building
+enterprise digital systems (ERP, CRM, SCM, inventory, MIS), applied AI and automation, and mobile
+and web products.
 
-## 🚀 Technology Stack
+Live: [srirealtime.com](https://srirealtime.com) · In-house products:
+[Pasumaivelanmai](https://pasumaivelanmai.com) · [Pasumai Trade](https://pasumaitrade.com)
 
-- **Frontend**: React 19, TypeScript, Tailwind CSS, Lucide Icons, Vite
-- **Backend / API**: Node.js, Express.js, TypeScript (`server.ts`)
-- **AI Integration**: Google Gemini 2.5 Flash API (`@google/genai`)
-- **Styling & UI**: Custom Apple-inspired Light Theme Design System
+## Stack
 
-## 🛠️ Getting Started
+- **Frontend** — React 19, TypeScript (strict), Vite 6, Tailwind CSS v4, React Router 7
+- **Motion** — `motion` (Framer Motion v12), with every animation gated on reduced-motion preferences
+- **Backend** — Node.js + Express (`server.ts`), serving the API and the built SPA
+- **AI** — Google Gemini via `@google/genai`, behind `POST /api/ai-consultant`
+- **Data** — Firebase Firestore for consultation inquiries; Firebase Analytics, loaded on idle
 
-### Prerequisites
-
-- **Node.js**: v18.0.0 or higher
-- **npm**: v9.0.0 or higher
-
-### Environment Setup
-
-Create a `.env.local` or set environment variable:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-```
-
-### Installation & Development
+## Getting started
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Run local dev server (Frontend + Express API Server)
-npm run dev
+cp .env.example .env.local   # then fill in the values
+npm run dev                  # http://localhost:3000
 ```
 
-Open `http://localhost:3000` in your browser.
+`npm run dev` runs the Express server with Vite in middleware mode, so the API and the frontend
+share one origin and one port.
 
-## 📦 Production Deployment Build
+### Environment
 
-```bash
-# Build production bundle & Express server
-npm run build
+Both groups are optional — the app degrades honestly without them.
 
-# Start production server
-npm start
+| Variable | Purpose | Without it |
+| --- | --- | --- |
+| `GEMINI_API_KEY` | Powers the AI solution architect | The endpoint returns a curated fallback recommendation |
+| `VITE_FIREBASE_*` | Firestore writes + analytics | The contact form falls back to a `mailto:` handoff |
 
-# Preview production static build locally
-npm run preview
+Firebase config is read from `VITE_FIREBASE_API_KEY`, `_AUTH_DOMAIN`, `_PROJECT_ID`,
+`_STORAGE_BUCKET`, `_MESSAGING_SENDER_ID`, `_APP_ID` and `_MEASUREMENT_ID`. Keep real values in
+`.env.local`, which is gitignored.
+
+## Scripts
+
+| Command | Does |
+| --- | --- |
+| `npm run dev` | Express + Vite dev server on port 3000 |
+| `npm run lint` | `tsc --noEmit` — strict type check across the app and server |
+| `npm run build` | Vite production build plus an esbuild bundle of the server |
+| `npm start` | Runs the built server from `dist/` |
+| `npm run preview` | Serves the static build |
+| `npm run deploy` | Build, then `firebase deploy` |
+
+## Structure
+
+```
+src/
+  pages/           One component per route, each owning its own SEO metadata
+  components/
+    layout/        Navbar, Footer, PageHero, accessibility panel
+    sections/      Composable page sections (Hero, Services, Process, …)
+    ui/            Primitives: Section, Reveal, Counter, Marquee, OrbitSystem
+  context/         Accessibility settings, persisted to localStorage
+  data/            All site copy and structured content
+  hooks/           useMotionEnabled
+  lib/             Firebase, inquiries, SEO, navigation, icon resolution
 ```
 
-## 🏢 Official Contact & Details
+### Routes
 
-- **Company**: SRI REAL TIME
-- **Website**: [https://srirealtime.com](https://srirealtime.com)
-- **Official Email**: org@srirealtime.com
-- **Inhouse Products**: [Pasumaivelanmai](https://pasumaivelanmai.com) | [Pasumai Trade](https://pasumaitrade.com)
+`/` · `/services` · `/ai` · `/technology` · `/process` · `/work` · `/estimator` · `/contact`
+
+Every route is a real URL with its own title, description, canonical and Open Graph tags. Only the
+home page ships in the main bundle; the rest are code-split and fetched on demand, as is the
+Firebase SDK.
+
+## Design system
+
+Tokens live in `src/index.css`. The palette is derived from the brand mark — deep navy for
+structure, brand red reserved for accent and calls to action — and every colour is defined as a
+semantic CSS variable (`--surface`, `--text-muted`, `--accent`) that swaps wholesale in dark mode.
+Type is Space Grotesk for display, Inter for body and JetBrains Mono for labels.
+
+## Accessibility
+
+A settings panel in the header controls dark mode, high contrast, reduced motion, a
+dyslexia-friendly typeface, stronger focus outlines, text scaling and a large-format presentation
+mode. Preferences persist to `localStorage` and apply as classes on the root element. JavaScript
+animation also honours the OS `prefers-reduced-motion` setting.
+
+## Content policy
+
+The capability showcases under `/work` are **representative solution blueprints** — engineering
+approaches and the targets an architecture is designed to hit. They are deliberately not presented
+as measured results from named client engagements. Keep it that way when adding to
+`CAPABILITY_SHOWCASES`.
+
+## Contact
+
+**org@srirealtime.com** · Coimbatore, Tamil Nadu, India
