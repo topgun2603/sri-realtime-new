@@ -16,7 +16,7 @@ export const BackToTop: React.FC = () => {
   const animate = useMotionEnabled();
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.8);
+    const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.6);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -37,7 +37,10 @@ export const BackToTop: React.FC = () => {
           animate={animate ? { opacity: 1, scale: 1, y: 0 } : {}}
           exit={animate ? { opacity: 0, scale: 0.7, y: 12 } : {}}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          className="group fixed bottom-6 left-5 z-40 grid h-12 w-12 place-items-center rounded-full border border-white/15 bg-navy-900/80 text-white shadow-[0_10px_36px_-8px_rgb(0_0_0_/_0.7)] backdrop-blur-md transition-colors duration-300 hover:border-brand-500 hover:bg-brand-600 sm:bottom-8 sm:left-8"
+          /* navy-700, not navy-900: against the near-black dark ground a
+             900-weight circle composites to roughly the page colour and
+             disappears. This reads on both themes. */
+          className="group fixed bottom-6 left-5 z-40 grid h-12 w-12 place-items-center rounded-full border border-white/25 bg-navy-700 text-white shadow-[0_8px_30px_-6px_rgb(224_36_36_/_0.5),0_4px_12px_-2px_rgb(0_0_0_/_0.6)] transition-all duration-300 hover:border-brand-400 hover:bg-brand-600 hover:shadow-[0_10px_38px_-6px_rgb(224_36_36_/_0.8)] sm:bottom-8 sm:left-8"
         >
           <ArrowUp className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
         </motion.button>
