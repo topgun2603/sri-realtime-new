@@ -26,6 +26,16 @@ npm run dev                  # http://localhost:3000
 `npm run dev` runs the Express server with Vite in middleware mode, so the API and the frontend
 share one origin and one port.
 
+Both ports are configurable, for running alongside other local projects:
+
+```bash
+PORT=3100 HMR_PORT=24778 npm run dev
+```
+
+`PORT` defaults to 3000 and `HMR_PORT` to 24678. Set `HMR_PORT` whenever you change `PORT` —
+Vite opens its own websocket in middleware mode, and a second project on the default will take
+it and leave hot reload silently broken.
+
 ### Environment
 
 Both groups are optional — the app degrades honestly without them.

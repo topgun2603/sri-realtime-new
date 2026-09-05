@@ -26,7 +26,13 @@ export default defineConfig(() => {
       },
     },
     server: {
-      hmr: process.env.DISABLE_HMR !== 'true',
+      // In middleware mode Vite opens its own websocket for HMR. Give it a
+      // configurable port too, or a second local project on the default will
+      // take it and HMR silently dies.
+      hmr:
+        process.env.DISABLE_HMR === 'true'
+          ? false
+          : { port: Number(process.env.HMR_PORT) || 24678 },
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
   };

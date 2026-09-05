@@ -13,7 +13,8 @@ dotenv.config();
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  // Configurable so the dev server can sit beside other local projects.
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: "64kb" }));
 
@@ -154,7 +155,7 @@ Return ONLY valid raw JSON with no markdown formatting around it if possible or 
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[SRI REAL TIME Server] running on http://0.0.0.0:${PORT}`);
+    console.log(`[SRI REAL TIME] http://localhost:${PORT}`);
   });
 }
 
