@@ -4,6 +4,7 @@ import { AccessibilityProvider } from './context/AccessibilityContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { AccessibilityPanel } from './components/layout/AccessibilityPanel';
+import { ChatWidget } from './components/layout/ChatWidget';
 import { ScrollProgress } from './components/ui/ScrollProgress';
 import { BackToTop } from './components/ui/BackToTop';
 import { initAnalytics } from './lib/firebase';
@@ -95,6 +96,7 @@ const Shell: React.FC = () => {
       <Footer />
       <BackToTop />
       <AccessibilityPanel open={a11yOpen} onClose={() => setA11yOpen(false)} />
+      <ChatWidget />
     </>
   );
 };
