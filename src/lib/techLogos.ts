@@ -4,7 +4,7 @@ import {
   siPostgresql, siMysql, siMongodb, siRedis, siSqlite, siFirebase,
   siGooglegemini, siTensorflow, siPytorch, siScikitlearn, siLangchain, siHuggingface,
   siDocker, siKubernetes, siGithubactions, siTerraform,
-  siOdoo, siSap, siTypescript,
+  siOdoo, siSap, siTypescript, siClaude,
 } from 'simple-icons';
 import { Blocks, BarChart3, type LucideIcon } from 'lucide-react';
 
@@ -76,6 +76,7 @@ export const TECH_LOGOS: Record<string, TechLogo> = {
   'Firebase': brand(siFirebase, '#FFA000'),
 
   // AI & ML
+  'Claude': brand(siClaude),
   'Gemini & GPT': brand(siGooglegemini, '#A78BFA'),
   'TensorFlow': brand(siTensorflow),
   'PyTorch': brand(siPytorch),
@@ -102,5 +103,5 @@ export const TECH_LOGOS: Record<string, TechLogo> = {
 export const MARQUEE_TECH = [
   'React', 'Next.js', 'Node.js', 'TypeScript', 'PostgreSQL', 'MongoDB',
   'Redis', 'Docker', 'Kubernetes', 'Terraform', 'Vite', 'Tailwind CSS',
-  'TensorFlow', 'PyTorch', 'Gemini & GPT', 'LangChain', 'Flutter', 'Firebase',
+  'TensorFlow', 'PyTorch', 'Claude', 'Gemini & GPT', 'LangChain', 'Flutter', 'Firebase',
 ];

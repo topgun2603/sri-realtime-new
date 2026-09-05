@@ -5,6 +5,7 @@ import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { AccessibilityPanel } from './components/layout/AccessibilityPanel';
 import { ScrollProgress } from './components/ui/ScrollProgress';
+import { BackToTop } from './components/ui/BackToTop';
 import { initAnalytics } from './lib/firebase';
 
 // The landing page ships in the main bundle so the first paint needs no
@@ -92,6 +93,7 @@ const Shell: React.FC = () => {
       </main>
 
       <Footer />
+      <BackToTop />
       <AccessibilityPanel open={a11yOpen} onClose={() => setA11yOpen(false)} />
     </>
   );

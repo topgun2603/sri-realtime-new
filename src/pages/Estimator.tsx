@@ -6,44 +6,43 @@ import { PageHero } from '../components/layout/PageHero';
 import { Section } from '../components/ui/Section';
 import { Reveal } from '../components/ui/Reveal';
 
+/*
+ * Deliberately no pricing anywhere in this file. Commercials belong in the
+ * discovery conversation, not on a public page — and anything shipped here
+ * would sit in the JS bundle for anyone to read, whether or not it is drawn
+ * on screen. Effort is expressed only in weeks.
+ */
 const APP_TYPES = [
-  { id: 'mobile', label: 'Mobile app (iOS / Android)', baseWeeks: 6, baseCost: 12000 },
-  { id: 'web', label: 'Custom enterprise web app', baseWeeks: 5, baseCost: 10000 },
-  { id: 'erp', label: 'Full enterprise ERP', baseWeeks: 10, baseCost: 25000 },
-  { id: 'crm', label: 'CRM & sales pipeline', baseWeeks: 7, baseCost: 15000 },
-  { id: 'inventory', label: 'Inventory & supply chain', baseWeeks: 8, baseCost: 18000 },
-  { id: 'ai_module', label: 'AI & process automation', baseWeeks: 4, baseCost: 9000 },
+  { id: 'mobile', label: 'Mobile app (iOS / Android)', baseWeeks: 6 },
+  { id: 'web', label: 'Custom enterprise web app', baseWeeks: 5 },
+  { id: 'erp', label: 'Full enterprise ERP', baseWeeks: 10 },
+  { id: 'crm', label: 'CRM & sales pipeline', baseWeeks: 7 },
+  { id: 'inventory', label: 'Inventory & supply chain', baseWeeks: 8 },
+  { id: 'ai_module', label: 'AI & process automation', baseWeeks: 4 },
 ];
 
 const FEATURES = [
-  { id: 'mis_dashboard', label: 'MIS analytics dashboard', weeks: 1.5, cost: 2500 },
-  { id: 'ai_chatbot', label: 'AI assistant (RAG)', weeks: 2, cost: 3500 },
-  { id: 'ocr_extraction', label: 'Document OCR extraction', weeks: 2, cost: 4000 },
-  { id: 'warehouse_sync', label: 'Multi-warehouse barcode sync', weeks: 1.5, cost: 3000 },
-  { id: 'role_permissions', label: 'Role-based access control', weeks: 1, cost: 1500 },
-  { id: 'payment_gateway', label: 'Multi-currency checkout', weeks: 1, cost: 2000 },
-  { id: 'offline_sync', label: 'Offline-first data engine', weeks: 1.5, cost: 2500 },
-  { id: 'cloud_devops', label: 'CI/CD & zero-downtime deploys', weeks: 1, cost: 2000 },
+  { id: 'mis_dashboard', label: 'MIS analytics dashboard', weeks: 1.5 },
+  { id: 'ai_chatbot', label: 'AI assistant (RAG)', weeks: 2 },
+  { id: 'ocr_extraction', label: 'Document OCR extraction', weeks: 2 },
+  { id: 'warehouse_sync', label: 'Multi-warehouse barcode sync', weeks: 1.5 },
+  { id: 'role_permissions', label: 'Role-based access control', weeks: 1 },
+  { id: 'payment_gateway', label: 'Multi-currency checkout', weeks: 1 },
+  { id: 'offline_sync', label: 'Offline-first data engine', weeks: 1.5 },
+  { id: 'cloud_devops', label: 'CI/CD & zero-downtime deploys', weeks: 1 },
 ];
 
 const SUPPORT_TIERS = [
-  { id: 'standard', label: 'Standard launch', desc: 'Deployment plus 30 days of support', weeks: 0, multiplier: 1 },
-  { id: 'priority', label: 'Priority SLA', desc: 'Monitored infrastructure and a 24/7 line', weeks: 0.5, multiplier: 1.12 },
-  { id: 'managed', label: 'Fully managed', desc: 'Dedicated engineer and monthly iterations', weeks: 1, multiplier: 1.28 },
+  { id: 'standard', label: 'Standard launch', desc: 'Deployment plus 30 days of support', weeks: 0 },
+  { id: 'priority', label: 'Priority SLA', desc: 'Monitored infrastructure and a 24/7 line', weeks: 0.5 },
+  { id: 'managed', label: 'Fully managed', desc: 'Dedicated engineer and monthly iterations', weeks: 1 },
 ];
-
-const money = (n: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(n);
 
 export default function Estimator() {
   useSeo({
     title: 'Scope Estimator',
     description:
-      'Estimate the timeline and indicative budget for your enterprise system, AI module or mobile and web product, then take the specification straight into a consultation.',
+      'Estimate the delivery timeline for your enterprise system, AI module or mobile and web product, then take the specification straight into a consultation.',
     path: '/estimator',
   });
 
@@ -62,12 +61,9 @@ export default function Estimator() {
 
     const chosen = FEATURES.filter((f) => selected.includes(f.id));
     const addedWeeks = chosen.reduce((sum, f) => sum + f.weeks, 0);
-    const addedCost = chosen.reduce((sum, f) => sum + f.cost, 0);
-
     const weeks = Math.round((app.baseWeeks + addedWeeks + tier.weeks) * 10) / 10;
-    const cost = Math.round(((app.baseCost + addedCost) * tier.multiplier) / 500) * 500;
 
-    return { app, tier, chosen, weeks, cost };
+    return { app, tier, chosen, weeks };
   }, [appType, selected, support]);
 
   const toggleFeature = (id: string) =>
@@ -75,13 +71,13 @@ export default function Estimator() {
 
   const handleBook = () => {
     const featureList = estimate.chosen.map((f) => f.label).join(', ') || 'no add-on modules';
-    const notes =
-      `Scope from the estimator\n` +
-      `• Solution: ${estimate.app.label}\n` +
-      `• Modules: ${featureList}\n` +
-      `• Support: ${estimate.tier.label}\n` +
-      `• Indicative timeline: ~${estimate.weeks} weeks\n` +
-      `• Indicative range: ${money(estimate.cost * 0.85)}–${money(estimate.cost * 1.15)}`;
+    const notes = [
+      'Scope from the estimator',
+      `• Solution: ${estimate.app.label}`,
+      `• Modules: ${featureList}`,
+      `• Support: ${estimate.tier.label}`,
+      `• Indicative timeline: ~${estimate.weeks} weeks`,
+    ].join('\n');
 
     navigate('/contact', { state: { notes } });
   };
@@ -92,7 +88,7 @@ export default function Estimator() {
         visual="estimator"
         eyebrow="Scope estimator"
         title={<>Size your project before you talk to anyone</>}
-        description="Choose a solution, add the modules you need, and see a realistic timeline and budget range. Then send the specification straight to us."
+        description="Choose a solution, add the modules you need, and see a realistic delivery timeline. Then send the specification straight to us and we’ll take it from there."
       />
 
       <Section bloom="right">
@@ -229,12 +225,9 @@ export default function Estimator() {
                   </div>
                 </div>
 
-                <div className="mt-6 border-t border-white/10 pt-5">
-                  <span className="text-xs text-navy-300">Budget range</span>
-                  <div className="mt-1 font-display text-2xl font-semibold text-white">
-                    {money(estimate.cost * 0.85)} – {money(estimate.cost * 1.15)}
-                  </div>
-                </div>
+                <p className="mt-5 border-t border-white/10 pt-5 text-xs leading-relaxed text-navy-300">
+                  Discovery, design, build, QA and launch — end to end.
+                </p>
               </div>
 
               <dl className="space-y-3 p-7 text-sm">
@@ -256,8 +249,9 @@ export default function Estimator() {
                 <p className="mt-5 flex items-start gap-2.5 text-[0.72rem] leading-relaxed text-subtle">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" aria-hidden="true" />
                   <span>
-                    An indicative planning range, not a quote. Final scope and pricing follow the
-                    discovery workshop.
+                    A planning estimate, not a quote. We price each engagement against its
+                    agreed scope, and talk commercials with you directly after the discovery
+                    workshop.
                   </span>
                 </p>
               </div>

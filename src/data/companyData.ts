@@ -446,6 +446,7 @@ export const TECH_EXPERTISE: TechItem[] = [
   { name: 'Firebase', category: 'databases', description: 'Real-time document database and auth.', popularFor: 'Live sync and rapid prototypes', badge: 'BaaS' },
 
   // AI / ML
+  { name: 'Claude', category: 'ai', description: 'Anthropic’s frontier models, strong on long-context reasoning.', popularFor: 'Agents, code generation and document analysis', badge: 'Frontier LLM' },
   { name: 'Gemini & GPT', category: 'ai', description: 'Frontier LLMs for reasoning and retrieval.', popularFor: 'Assistants, summarisation and agents', badge: 'GenAI' },
   { name: 'TensorFlow', category: 'ai', description: 'End-to-end machine learning platform.', popularFor: 'Deep learning and computer vision', badge: 'ML Library' },
   { name: 'PyTorch', category: 'ai', description: 'Flexible deep learning framework.', popularFor: 'Predictive analytics and custom models', badge: 'ML Library' },
